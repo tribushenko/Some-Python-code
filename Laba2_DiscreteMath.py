@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
-import pickle
+import networkx as nx
 import os
+from random import choice, randint
 
 root = Tk()
 root.title("Головне вікно")
@@ -27,7 +28,7 @@ def display_variant():
 
 
 def window2():
-    global set_A, set_B
+    global set_A, set_B, women, men
     set_A, set_B = set(), set()
     win2 = Toplevel(root)
     win2.title("Друге вікно")
@@ -140,7 +141,6 @@ def window2():
     buttonB_save.grid(row=6, column=2)
     button_clearB = Button(win2, text="Очистити множину В", command=clear_set_B, font="Arial 13 bold", width=20,
                            height=1)
-    # function clear BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
     button_clearB.grid(row=7, column=2)
     button_show_elements = Button(win2, text="Зчитати множини з файлу", command=show_from_file, font="Arial 13 bold",
                                   width=25, height=1)
@@ -150,7 +150,65 @@ def window2():
 
 
 def window3():
-    pass
+    def aSb():  # а кум б
+        set_a = set(i for i in set_A and set_B if i in men)
+        set_b = set_A.union(set_B)
+        S = {}
+        for i in range(len(set_a)):
+            one = choice(tuple(set_a))
+            for j in range(randint(0, len(set_b))):
+                second = choice(tuple(set_b))
+                S[one] = second
+            set_a.remove(one)
+        return S
+
+    def aRb():
+        R = {}
+        set_a = set(i for i in set_A and set_B if i in men)
+        set_b = set(i for i in set_A and set_B if i in women)
+        for i in range(min(len(set_a), len(set_b))):
+            one = choice(list(set_a))
+            second = choice(list(set_b))
+            R[one] = second
+            set_a.remove(one)
+            set_b.remove(second)
+        return R
+
+    try:
+        list_zip_men = list(zip(men, [0 for i in range(len(men))]))
+        list_zip_women = list(zip(women, [1 for j in range(len(women))]))
+        dict_women_men = dict(list_zip_men + list_zip_women)
+        S = aSb()
+        R = aRb()
+    except NameError:
+        messagebox.showinfo("Warning", "Спочатку зайдіть у друге вікно і вкажіть множини А та В")
+        pass
+    else:
+        win3 = Toplevel(root)
+        win3.title("Третє вікно")
+        win3.focus_set()
+        lblfrm1 = LabelFrame(win3, text="Елементи множини А", font="Arial 13 bold")
+        lblfrm1.grid(row=3, column=0, columnspan=1)
+        listbox1 = Listbox(lblfrm1, selectmode=SINGLE, font="Arial 14")
+        listbox1.focus_set()
+        listbox1.grid(row=3, column=0)
+        for i in set_A:
+            listbox1.insert(END, i)
+        scrollbar1 = Scrollbar(lblfrm1, command=listbox1.yview)
+        listbox1.configure(yscrollcommand=scrollbar1.set)
+        scrollbar1.grid(row=3, column=1, sticky=W)
+        lblfrm2 = LabelFrame(win3, text="Елементи множини B", font="Arial 13 bold")
+        lblfrm2.grid(row=3, column=2, columnspan=2)
+        listbox2 = Listbox(lblfrm2, selectmode=SINGLE, font="Arial 14")
+        listbox2.focus_set()
+        listbox2.grid(row=3, column=4)
+        for i in set_B:
+            listbox2.insert(END, i)
+        scrollbar2 = Scrollbar(lblfrm2, command=listbox2.yview)
+        listbox2.configure(yscrollcommand=scrollbar2.set)
+        scrollbar2.grid(row=3, column=3, sticky=W)
+        # G = nx.DiGraph()
+        # G.add_nodes_from()
 
 
 def window4():
