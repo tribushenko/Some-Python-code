@@ -3,6 +3,7 @@ from tkinter import messagebox
 import networkx as nx
 import os
 from random import choice, randint
+import matplotlib.pyplot as plt
 
 root = Tk()
 root.title("Головне вікно")
@@ -103,10 +104,8 @@ def window2():
 
     lf1 = LabelFrame(win2, text="Жіночі імена", font="Arial 13 bold")
     lf1.grid(row=3, column=0, columnspan=1)
-    women = ["Anastasia", "Irina", "Regina", "Katherine", "Larisa", "Helga", "Diana", "Lily", "Marina", "Helen",
-             "Maryanna"]
-    men = ["Sergei", "Vladimir", "Michael", "Danila", "Andrew", "Tom", "Artemis", "Bob", "Mikol", "Pedro",
-           "Alexei"]
+    women = ["Anastasia", "Irina", "Regina", "Katherine", "Larisa", "Helga", "Diana", "Lily", "Marina"]
+    men = ["Sergei", "Vladimir", "Michael", "Danila", "Andrew", "Tom", "Artemis", "Bob", "Mikol"]
     listbox1 = Listbox(lf1, selectmode=SINGLE, font="Arial 14")
     listbox1.focus_set()
     listbox1.bind("<<ListboxSelect>>", add_toSet_woman)
@@ -150,36 +149,63 @@ def window2():
 
 
 def window3():
-    def aSb():  # а кум б
-        set_a = set(i for i in set_A and set_B if i in men)
-        set_b = set_A.union(set_B)
+    def aSb(event):  # а кум б Головною умовою даного алгоритму є те що змінна а повинна бути тільки чоловіком, а змінна
+        # б може бути як чоловіком так і жінкою
+        global S
         S = {}
+        set_a_A = set(i for i in set_A if i in men)
+        set_a_B = set(i for i in set_B if i in men)
+        set_a = set_a_A.union(set_a_B)
+        set_b = set_A.union(set_B)
         for i in range(len(set_a)):
-            one = choice(tuple(set_a))
+            one = choice(list(set_a))
             for j in range(randint(0, len(set_b))):
                 second = choice(tuple(set_b))
                 S[one] = second
             set_a.remove(one)
-        return S
+        g1 = nx.DiGraph()
+        g1.add_nodes_from(i[0] for i in S.items())
+        g1.add_edges_from(S.items())
+        nx.draw_networkx(g1, pos=nx.spring_layout(g1), arrows=True, with_labels=True, edges=g1.edges(),
+                         edge_color="b")
+        plt.show()
 
-    def aRb():
+    def aRb(event):
+        # головною умовою даного алгоритму є те, що а повинен бути тільки чоловіком, а б - жінкою і тільки один раз
+        # і після цього вони зникають з обох множин
+        global R
         R = {}
-        set_a = set(i for i in set_A and set_B if i in men)
-        set_b = set(i for i in set_A and set_B if i in women)
+        set_a_A = set(i for i in set_A if i in men)
+        set_a_B = set(i for i in set_B if i in men)
+        set_a = set_a_A.union(set_a_B)
+        set_b_A = set(i for i in set_A if i in women)
+        set_b_B = set(i for i in set_B if i in women)
+        set_b = set_b_A.union(set_b_B)
         for i in range(min(len(set_a), len(set_b))):
             one = choice(list(set_a))
             second = choice(list(set_b))
             R[one] = second
             set_a.remove(one)
             set_b.remove(second)
-        return R
+        g1 = nx.DiGraph()
+        g1.add_nodes_from(i[0] for i in R.items())
+        g1.add_edges_from(R.items())
+        nx.draw_networkx(g1, pos=nx.spring_layout(g1), arrows=True, with_labels=True, edges=g1.edges(),
+                         edge_color="b")
+        plt.show()
+
+    def warn(event):
+        messagebox.showinfo("Warning", "Щоб краще розгледіти графи при натисканні будь-яких з кнопок нижче, "
+                                       "використовуйте кнопку <лупа> для більшого масштабу зображення та стрілочку "
+                                       "вліво, аби повернутися до початкового масштабу. "
+                                       "Після вибору даної кнопки виділяйте зону, яка Вас цікавить в прямокутник і "
+                                       "приближення об'єкту спрацює")
+        button0["text"] = "Відкрито"
+        button0["state"] = DISABLED
 
     try:
         list_zip_men = list(zip(men, [0 for i in range(len(men))]))
         list_zip_women = list(zip(women, [1 for j in range(len(women))]))
-        dict_women_men = dict(list_zip_men + list_zip_women)
-        S = aSb()
-        R = aRb()
     except NameError:
         messagebox.showinfo("Warning", "Спочатку зайдіть у друге вікно і вкажіть множини А та В")
         pass
@@ -187,6 +213,8 @@ def window3():
         win3 = Toplevel(root)
         win3.title("Третє вікно")
         win3.focus_set()
+        Label(win3, text="Відображення множин А, В і алгоритми відповідно до варіанту", font="Arial 17 bold").grid(
+            row=0, column=0, columnspan=5)
         lblfrm1 = LabelFrame(win3, text="Елементи множини А", font="Arial 13 bold")
         lblfrm1.grid(row=3, column=0, columnspan=1)
         listbox1 = Listbox(lblfrm1, selectmode=SINGLE, font="Arial 14")
@@ -207,12 +235,97 @@ def window3():
         scrollbar2 = Scrollbar(lblfrm2, command=listbox2.yview)
         listbox2.configure(yscrollcommand=scrollbar2.set)
         scrollbar2.grid(row=3, column=3, sticky=W)
-        # G = nx.DiGraph()
-        # G.add_nodes_from()
+        button0 = Button(win3, text="Дізнатися додаткову інформацію перед переглядом графів", font="Arial 14 bold",
+                         fg="red")
+        button0.bind("<Button-1>", warn)
+        button0.grid(row=4, column=1)
+        button1 = Button(win3, text="Показати зв'язок aSb, якщо а - кум b", font='Arial 14 bold')
+        button1.bind("<Button-1>", aSb)
+        button1.grid(row=5, column=1)
+        button2 = Button(win3, text="Показати зв'язок aSb, якщо а - чоловік b", font='Arial 14 bold')
+        button2.bind("<Button-1>", aRb)
+        button2.grid(row=7, column=1)
 
 
 def window4():
-    pass
+    def buttonUnionfunc(event):
+        g1 = nx.DiGraph()
+        g1.add_nodes_from(i[0] for i in S.items())
+        g1.add_nodes_from([i[0] for i in R.items()])
+        g1.add_edges_from(S.items())
+        g1.add_edges_from(R.items())
+        nx.draw_networkx(g1, pos=nx.spring_layout(g1), arrows=True, with_labels=True, edges=g1.edges(),
+                         edge_color="b")
+        plt.show()
+
+    def buttonIntersectionfunc(event):
+        Intersection = set(R.keys()) & set(S.keys())
+        g1 = nx.DiGraph()
+        g1.add_nodes_from(Intersection)
+        g1.add_edges_from(i for i in S.items() if i[0] in Intersection)
+        g1.add_edges_from(i for i in R.items() if i[0] in Intersection)
+        nx.draw_networkx(g1, pos=nx.spring_layout(g1), arrows=True, with_labels=True, edges=g1.edges(),
+                         edge_color="b")
+        plt.show()
+
+    def buttonMinusfunc(event):
+        c = list(R)
+        for i in S:
+            for j in R:
+                if i == j:
+                    c.remove(j)
+        g = nx.DiGraph()
+        g.add_nodes_from(list(set_A | set_B))
+        g.add_edges_from(c)
+        nx.draw_networkx(g, pos=nx.spring_layout(g), arrows=True, with_labels=True, edges=g.edges())
+        plt.show()
+
+    def buttonUminusRfunc(event):
+        c = list()
+        for i in set_A:
+            for j in set_B:
+                if (i, j) not in R:
+                    c.append([i, j])
+        g = nx.DiGraph()
+        g.add_nodes_from(list(set_A | set_B))
+        g.add_edges_from(c)
+        nx.draw_networkx(g, pos=nx.spring_layout(g), arrows=True, with_labels=True, edges=g.edges())
+        plt.show()
+
+    def buttonSreversefunc(event):
+        c = list()
+        for i in S.items():
+            c.append(i[::-1])
+        g = nx.DiGraph()
+        g.add_nodes_from(i[1] for i in S.items())
+        g.add_edges_from(c)
+        nx.draw_networkx(g, pos=nx.spring_layout(g), arrows=True, with_labels=True, edges=g.edges())
+        plt.show()
+
+    try:
+        print(S, R, sep="\n")
+    except NameError:
+        messagebox.showinfo("Warning", "Спочатку зайдіть у вікна 2, 3, щоб сформувати множини і отримати відношення R "
+                                       "i S")
+    else:
+        win4 = Toplevel(root)
+        win4.title("Четверте вікно")
+        win4.minsize(200, 200)
+        buttonUnion = Button(win4, text="Відношення R∪S", font="Arial 14 bold", width=15)
+        buttonUnion.bind("<Button-1>", buttonUnionfunc)
+        buttonUnion.grid(row=1, column=1)
+        buttonIntersection = Button(win4, text="Відношення R∩S", font="Arial 14 bold", width=15)
+        buttonIntersection.bind("<Button-1>", buttonIntersectionfunc)
+        buttonIntersection.grid(row=2, column=1)
+        buttonMinus = Button(win4, text="Відношення R\\S", font="Arial 14 bold", width=15)
+        buttonMinus.bind("<Button-1>", buttonMinusfunc)
+        buttonMinus.grid(row=3, column=1)
+        buttonUminusR = Button(win4, text="Відношення U\\R", font="Arial 14 bold", width=15)
+        buttonUminusR.bind("<Button-1>", buttonUminusRfunc)
+        buttonUminusR.grid(row=4, column=1)
+        buttonSreverse = Button(win4, text="Відношення S^(-1)", font="Arial 14 bold", width=15)
+        buttonSreverse.bind("<Button-1>", buttonSreversefunc)
+        buttonSreverse.grid(row=5, column=1)
 
 
 info_button = Button(root, text="Отримати відомості про студента", font="Arial 13",
