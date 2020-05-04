@@ -9,7 +9,7 @@ print(f"graph - {graph}\ncosts - {costs}\nparents - {parents}")
 def find_lowest_cost_node(costs):
 	lowest_cost = float("inf")  # means infinity
 	lowest_cost_node = None  # declare a variable
-	for node in costs:  
+	for node in costs:
 		cost = costs[node]
 		if cost < lowest_cost and node not in processed:
 			lowest_cost = cost
