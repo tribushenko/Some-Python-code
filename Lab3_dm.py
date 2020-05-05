@@ -8,17 +8,12 @@ root, vertexes = Tk(), {}
 
 
 def draw_graph(event):
-	local_vertexes = {}
-	for k, v in vertexes.items():
-		for i in range(len(v)):
-			local_vertexes[k] = v.pop()
-	print(local_vertexes)
 	g1 = nx.DiGraph()
-	g1.add_nodes_from(i[1] for i in local_vertexes.items())
-	# g1.add_nodes_from(i[0] for i in local_vertexes0.items())
-	g1.add_edges_from(i for i in local_vertexes.items())
-	# g1.add_edges_from(i[::-1] for i in local_vertexes.items())
-	# g1.add_edges_from(i for i in local_vertexes0.items())
+	for i in vertexes.keys():
+		g1.add_node(i)
+		for j in list(vertexes[i]):
+			g1.add_edge(i, j)
+			vertexes[i].remove(j)
 	nx.draw_networkx(g1, pos=nx.spring_layout(g1), arrows=True, with_labels=True, edges=g1.edges(),
 		edge_color="b")
 	plt.show()
@@ -66,9 +61,9 @@ def get_vertexes(vertex1, vertex2):
 
 
 def random_vertexes(event):
-	quantity_of_vertex2 = randint(1, 10)
+	quantity_of_vertex2 = randint(1, 7)
 	for j in range(1, 11):
-		vertexes.update({str(j): set(str(randint(1, 10)) for i in range(quantity_of_vertex2) if i != j)})
+		vertexes.update({str(j): set(str(randint(1, 7)) for i in range(quantity_of_vertex2) if i != j)})
 
 
 def win2():
