@@ -4,15 +4,14 @@ import networkx as nx
 import pylab as plt
 from random import randint
 
-
-
 root = Tk()
 
 
-class Graph: #graphs and prim's algorithm
+class Graph:  # graphs and prim's algorithm
 	def __init__(self, vertices):
 		self.V = vertices
 		self.graph = [[0 for column in range(vertices)] for row in range(vertices)]
+
 	def printMST(self, parent):
 		print("Edge \tWeight")
 		for i in range(1, self.V):
@@ -35,6 +34,7 @@ class Graph: #graphs and prim's algorithm
 		nx.draw_networkx_edges(self.g, pos=nx.shell_layout(self.g), edgelist=self.listing, edge_color='r',
 			with_labels=True)
 		plt.show()
+
 	def minKey(self, key, mstSet):
 		# Initilaize min value
 		min = 1000000
@@ -87,7 +87,7 @@ def win_search(event):
 					Label(toplevel,
 						text="Перевірте таблицю! Вершина, \nяка йде із самої себе в себе має вагу 0, \nтому "
 						     "буде 0 \nзадля коректної роботи алгоритму.", fg="red").grid(
-						row=5, column=int(entry_quantity.get()) + 1)
+						row=6, column=int(entry_quantity.get()) + 1)
 				else:
 					table[i].append(int(entry_toplevel[i][j].get()))
 		print(table)
@@ -168,24 +168,10 @@ def give_info_about_student(event):
 	top_level.geometry("350x100")
 
 
-def win2():
-	pass
-
-
-def win3():
-	pass
-
-
 def win1():
 	global entry_quantity
 	root.title("Головне вікно")
 	root.geometry("300x150")
-	main_menu = Menu(root)
-	root.config(menu=main_menu)
-	file_menu = Menu(main_menu, tearoff=0)
-	file_menu.add_command(label="Матриця суміжності", command=win2)
-	file_menu.add_command(label="Матриця інцидентності", command=win3())
-	main_menu.add_cascade(label="Усі вікна", menu=file_menu)
 	entry_quantity = Entry(root, width=23)
 	entry_quantity.place(relx=0.25, rely=0.17)
 	Label(root, text="Введіть кількість вершин графа.", font="Arial 13 bold").place(
