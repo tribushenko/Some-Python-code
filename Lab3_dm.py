@@ -4,12 +4,68 @@ import networkx as nx
 import pylab as plt
 from random import randint
 
+
+
 root = Tk()
 
 
+class Graph: #graphs and prim's algorithm
+	def __init__(self, vertices):
+		self.V = vertices
+		self.graph = [[0 for column in range(vertices)] for row in range(vertices)]
+	def printMST(self, parent):
+		print("Edge \tWeight")
+		for i in range(1, self.V):
+			print(i + 1, "-", parent[i] + 1, "\t", self.graph[i][parent[i]])
+
+	def drawMST(self, parent):
+		self.g = nx.DiGraph()
+		self.listing = []
+		self.old_edges = []
+		for i in range(1, self.V + 1):
+			for j in range(1, self.V + 1):
+				self.old_edges.append((i, j))
+		for i in range(1, self.V):
+			self.g.add_node(i + 1)
+			self.g.add_edge(i + 1, parent[i] + 1)
+			self.listing.append((i + 1, parent[i] + 1))
+		nx.draw(self.g, pos=nx.shell_layout(self.g), with_labels=True, font_weight='bold')
+		nx.draw_networkx_edges(self.g, pos=nx.shell_layout(self.g), edgelist=self.old_edges, edge_color='b',
+			with_labels=True)
+		nx.draw_networkx_edges(self.g, pos=nx.shell_layout(self.g), edgelist=self.listing, edge_color='r',
+			with_labels=True)
+		plt.show()
+	def minKey(self, key, mstSet):
+		# Initilaize min value
+		min = 1000000
+		for v in range(self.V):
+			if key[v] < min and mstSet[v]==False:
+				min = key[v]
+				min_index = v
+		return min_index
+
+	def primMST(self):
+		key = [1000000] * self.V
+		parent = [None] * self.V
+		key[0] = 0
+		mstSet = [False] * self.V
+		parent[0] = -1
+		for cout in range(self.V):
+			u = self.minKey(key, mstSet)
+			mstSet[u] = True
+			for v in range(self.V):
+				if self.graph[u][v] > 0 and mstSet[v]==False and key[v] > self.graph[u][v]:
+					key[v] = self.graph[u][v]
+					parent[v] = u
+		self.printMST(parent)
+		self.drawMST(parent)
+
+
 def win_search(event):
-	def main_algorithm(event):
-		pass
+	def prim_algorithm(event):
+		g = Graph(int(entry_quantity.get()))
+		g.graph = table
+		g.primMST()
 
 	def draw_graph(event):
 		graph = nx.DiGraph()
@@ -19,6 +75,26 @@ def win_search(event):
 				graph.add_edge(i, j)
 		nx.draw_circular(graph, with_labels=1)
 		plt.show()
+
+	def start(event):
+		global table
+		table = []
+		for i in range(len(entry_toplevel)):
+			table.append([])
+			for j in range(len(entry_toplevel[i])):
+				if i==j and int(entry_toplevel[i][j].get())!=0:
+					table[i].append(0)
+					Label(toplevel,
+						text="Перевірте таблицю! Вершина, \nяка йде із самої себе в себе має вагу 0, \nтому "
+						     "буде 0 \nзадля коректної роботи алгоритму.", fg="red").grid(
+						row=5, column=int(entry_quantity.get()) + 1)
+				else:
+					table[i].append(int(entry_toplevel[i][j].get()))
+		print(table)
+		button_search = Button(toplevel, text="Почати пошук мінімального остовного дерева", font="Arial 12 bold")
+		button_search.bind("<Button-1>", prim_algorithm)
+		button_search.grid(row=5, column=int(entry_quantity.get()) + 1)
+
 
 	def warn(event):
 		messagebox.showinfo("Warning", "Щоб краще розгледіти графи при натисканні кнопки <Створити граф>,\nвикорист"
@@ -30,6 +106,7 @@ def win_search(event):
 		button_help["state"] = DISABLED
 
 	def create_table(number):
+		global table
 		table = [[randint(1, 20) for i in range(number)] for j in range(number)]
 		for i in range(number):
 			for j in range(number):
@@ -45,17 +122,6 @@ def win_search(event):
 		for i in range(int(entry_quantity.get())):
 			for j in range(int(entry_quantity.get())):
 				entry_toplevel[i][j].insert(END, element[i][j])
-		Label(toplevel, text="Введіть дві вершини, між якими треба знайти найкоротшу відстань: ", font="Arial 12").grid(
-			row=4, column=int(entry_quantity.get()) + 1)
-		Label(toplevel, text=" Перша вершина", font="Arial 12 bold").grid(row=5, column=int(entry_quantity.get()) + 1)
-		entry_first_vertex = Entry(toplevel)
-		entry_first_vertex.grid(row=6, column=int(entry_quantity.get()) + 1)
-		Label(toplevel, text=" Друга вершина", font="Arial 12 bold").grid(row=7, column=int(entry_quantity.get()) + 1)
-		entry_second_vertex = Entry(toplevel)
-		entry_second_vertex.grid(row=8, column=int(entry_quantity.get()) + 1)
-		button_draw_graph = Button(toplevel, text="Знайти найкоротшу відстань", font="Arial 12 bold", fg="purple")
-		button_draw_graph.bind("<Button-1>", main_algorithm)
-		button_draw_graph.grid(row=9, column=int(entry_quantity.get()) + 1)
 
 	if not entry_quantity.get():
 		messagebox.showinfo("Error occurred", "Спочатку задайте кількість вершин")
@@ -66,11 +132,11 @@ def win_search(event):
 	toplevel = Toplevel(root)
 	for i in range(int(entry_quantity.get()) + 1):
 		for j in range(int(entry_quantity.get()) + 1):  # кількість вершин в графі
-			if i == 0:
+			if i==0:
 				Label(toplevel, text='{}'.format(j), font='Arial 16 bold', width=3).grid(column=j, row=i, sticky=W)
-			elif j == 0:
+			elif j==0:
 				Label(toplevel, text='{}'.format(i), font='Arial 16 bold', width=3).grid(column=j, row=i, sticky=W)
-			elif i == 0 and j == 0:
+			elif i==0 and j==0:
 				Label(toplevel, text=' ', width=3).grid(column=j, row=i, sticky=W)
 	entry_toplevel = []
 	for i in range(int(entry_quantity.get())):
@@ -87,6 +153,9 @@ def win_search(event):
 	draw_graph_but = Button(toplevel, text="Створити граф", font="Arial 12 bold")
 	draw_graph_but.bind("<Button-1>", draw_graph)
 	draw_graph_but.grid(row=2, column=int(entry_quantity.get()) + 1)
+	button_start = Button(toplevel, text="Зчитати дані з таблиці", font="Arial 13 bold")
+	button_start.bind("<Button-1>", start)
+	button_start.grid(row=4, column=int(entry_quantity.get()) + 1)
 
 
 def give_info_about_student(event):
